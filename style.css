@@ -250,6 +250,8 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
   margin:0 auto 16px;
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
+.hjem-logo-fallback{
+  padding: 12px; /* ekstra luft inni ringen */
 }
 .hjem-tittel{
   font-family:'Bebas Neue',cursive;font-size:42px;letter-spacing:3px;
