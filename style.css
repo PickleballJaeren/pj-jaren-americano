@@ -349,6 +349,5 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
 .sammenlign-velger:focus{border-color:var(--accent)}
 .sammenlign-velger option{background:#0b1a30}
 
-.hjem-logo {
-  object-fit: contain;
+
 }
