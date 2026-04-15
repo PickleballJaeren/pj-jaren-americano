@@ -232,7 +232,6 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
 .form-badge-tom{background:rgba(100,116,139,.1);color:var(--muted);border:1px dashed var(--border2)}
 
 /* ── HJEMSKJERM ── */
-/* ── HJEMSKJERM LOGO FIX ── */
 .hjem-logo {
   width: 180px;
   aspect-ratio: 1 / 1;
@@ -243,40 +242,14 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
   display: flex;
   align-items: center;
   justify-content: center;
-
-  overflow: hidden; /* holder sirkelen ren */
 }
 
-/* Selve bildet */
+/* 🔥 Viktig for SVG */
 .hjem-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-
-/* Sørg for at ingen foreldre kutter logoen */
-header,
-.hero,
-.container,
-body {
-  overflow: visible !important;
-}
-
-/* Unngå høyde-problemer i header */
-header {
-  min-height: unset !important;
-  height: auto !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 📱 Mobiloptimalisering */
-@media (max-width: 600px) {
-  .hjem-logo {
-    width: 120px;
-    padding: 10px;
-  }
+  display: block;
 }
 .hjem-logo-fallback {
   display: none;
