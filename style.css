@@ -234,9 +234,9 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
 /* ── HJEMSKJERM ── */
 .hjem-logo {
   width: 180px;
-  height: 180px;
+  height: auto;          /* 🔥 viktig */
+  max-height: 180px;     /* holder størrelsen */
   border-radius: 50%;
-  object-fit: contain;
   background: #050f1f;
   padding: 10px;
 }
