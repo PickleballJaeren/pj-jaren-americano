@@ -232,26 +232,26 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
 .form-badge-tom{background:rgba(100,116,139,.1);color:var(--muted);border:1px dashed var(--border2)}
 
 /* ── HJEMSKJERM ── */
-.hjem-logo{
-  width: 75%;     /* viktig! */
-  height: 75%;
-  object-fit: contain;
-  border-radius: 50%;
-}
 .hjem-logo-fallback{
-  width: min(65vw, 200px);   /* større ring */
+  width: min(65vw, 200px);
   height: min(65vw, 200px);
   border-radius: 50%;
-  background: linear-gradient(135deg,var(--navy2),var(--navy3));
-  border: 3px solid var(--border2);
+  padding: 22px;
+  box-sizing: border-box;
   display:flex;
   align-items:center;
   justify-content:center;
   margin:0 auto 16px;
+  background: linear-gradient(135deg,var(--navy2),var(--navy3));
+  border: 3px solid var(--border2);
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
 }
-.hjem-logo-fallback{
-  padding: 12px; /* ekstra luft inni ringen */
+
+.hjem-logo{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display:block;
 }
 .hjem-tittel{
   font-family:'Bebas Neue',cursive;font-size:42px;letter-spacing:3px;
@@ -348,10 +348,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
 }
 .sammenlign-velger:focus{border-color:var(--accent)}
 .sammenlign-velger option{background:#0b1a30}
-.hjem-logo::before,
-.hjem-logo::after {
-  display: none !important;
-}
+
 .hjem-logo {
   object-fit: contain;
 }
