@@ -238,7 +238,9 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
   box-shadow:0 8px 32px rgba(0,0,0,0.4);
   border:3px solid var(--border2);
 }
-.hjem-logo-fallback{
+.hjem-logo-fallback {
+  display: none;
+}
   width:420px;height:420px;border-radius:50%;
   background:linear-gradient(135deg,var(--navy2),var(--navy3));
   border:3px solid var(--border2);
