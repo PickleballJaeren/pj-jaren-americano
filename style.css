@@ -232,16 +232,11 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
 .form-badge-tom{background:rgba(100,116,139,.1);color:var(--muted);border:1px dashed var(--border2)}
 
 /* ── HJEMSKJERM ── */
-.hjem-logo,
-.hjem-logo-fallback{
-  width: min(55vw, 180px);
-  height: min(55vw, 180px);
+.hjem-logo{
+  width: 75%;     /* viktig! */
+  height: 75%;
+  object-fit: contain;
   border-radius: 50%;
-  object-fit: contain; /* viktig! */
-  display: block;
-  margin: 0 auto 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  border: 3px solid var(--border2);
 }
 .hjem-logo-fallback{
   width: min(65vw, 200px);   /* større ring */
