@@ -350,3 +350,6 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
 .hjem-logo::after {
   display: none !important;
 }
+.hjem-logo {
+  object-fit: contain;
+}
