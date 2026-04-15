@@ -234,11 +234,19 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
 /* ── HJEMSKJERM ── */
 .hjem-logo {
   width: 180px;
-  height: auto;          /* 🔥 viktig */
-  max-height: 180px;     /* holder størrelsen */
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: #050f1f;
   padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hjem-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 }
 .hjem-logo-fallback {
