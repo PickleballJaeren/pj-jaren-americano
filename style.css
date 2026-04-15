@@ -232,6 +232,7 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
 .form-badge-tom{background:rgba(100,116,139,.1);color:var(--muted);border:1px dashed var(--border2)}
 
 /* ── HJEMSKJERM ── */
+/* ── HJEMSKJERM LOGO FIX ── */
 .hjem-logo {
   width: 180px;
   aspect-ratio: 1 / 1;
@@ -242,24 +243,40 @@ html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  overflow: hidden; /* holder sirkelen ren */
 }
 
-/* 🔥 Viktig for SVG */
+/* Selve bildet */
 .hjem-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  display: block;
 }
-.hjem-logo-fallback {
-  display: none;
+
+/* Sørg for at ingen foreldre kutter logoen */
+header,
+.hero,
+.container,
+body {
+  overflow: visible !important;
 }
-  width:420px;height:420px;border-radius:50%;
-  background:linear-gradient(135deg,var(--navy2),var(--navy3));
-  border:3px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 20px;font-size:128px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+
+/* Unngå høyde-problemer i header */
+header {
+  min-height: unset !important;
+  height: auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 📱 Mobiloptimalisering */
+@media (max-width: 600px) {
+  .hjem-logo {
+    width: 120px;
+    padding: 10px;
+  }
 }
 .hjem-tittel{
   font-family:'Bebas Neue',cursive;font-size:42px;letter-spacing:3px;
