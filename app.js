@@ -164,12 +164,16 @@ function fordelBaner(spillere, antallBaner) {
   const totBaner = antall5 + Math.floor((n - antall5 * 5) / 4);
   for (let i = antall5; i < totBaner; i++) baneStorr.push(4);
 
+  const mp = app.poengPerKamp ?? 17;
+  // 5-spillerbaner har 5 kamper vs 3 kamper på 4-spillerbaner.
+  // Skaleres med 3/5 slik at alle baner bruker omtrent like lang tid.
+  const mp5 = Math.round(mp * 3 / 5);
   const baner = [];
   let cursor = 0;
   baneStorr.forEach((storr, i) => {
     baner.push({
       baneNr:    i + 1,
-      maksPoeng: storr === 5 ? 11 : 17,
+      maksPoeng: storr === 5 ? mp5 : mp,
       spillere:  sorterte.slice(cursor, cursor + storr).map(s => ({
         id: s.id, navn: s.navn ?? 'Ukjent', rating: s.rating ?? STARTRATING,
       })),
@@ -236,6 +240,7 @@ const app = {
 // PIN-tilstand
 let pinCallback      = null;  // funksjon som kjøres etter godkjent PIN
 let pinForsok        = 0;     // teller for mislykkede forsøk
+let erAdmin          = false; // settes til true etter godkjent PIN, gjelder hele økten
 const PIN_MAKS_FORSOK = 5;
 
 
@@ -406,6 +411,11 @@ function getNivaaRatingHTML(rating, visLabel = true) {
 // PIN-SYSTEM (admin-beskyttelse)
 // ════════════════════════════════════════════════════════
 function krevAdmin(tittel, tekst, callback) {
+  // Allerede godkjent som admin i denne økten — kjør callback direkte
+  if (erAdmin) {
+    if (typeof callback === 'function') callback();
+    return;
+  }
   pinCallback = callback;
   pinForsok   = 0;
   document.getElementById('pin-tittel').textContent = tittel;
@@ -435,6 +445,7 @@ window.pinInput = pinInput;
 function bekreftPin() {
   const pin = [0,1,2,3].map(i => document.getElementById('pin'+i).value).join('');
   if (pin === ADMIN_PIN) {
+    erAdmin = true; // godkjent for resten av økten
     // Ta vare på callback FØR lukkPinModal() nullstiller den
     const cb = pinCallback;
     lukkPinModal();
@@ -976,11 +987,26 @@ function startLyttere() {
     snap => {
       if (!snap.exists()) return;
       const data = snap.data() ?? {};
+      const forrigeRunde = app.runde;
       app.runde        = data.gjeldendRunde ?? app.runde;
       app.baneOversikt = data.baneOversikt  ?? [];
       app.venteliste   = data.venteliste    ?? [];
       oppdaterRundeUI();
       visBanerDebounced();
+
+      // Økt avsluttet av admin — naviger alle til sluttresultat
+      if (data.status === 'avsluttet') {
+        if (app.treningId) sessionStorage.setItem('aktivTreningId', app.treningId);
+        stoppLyttere();
+        naviger('slutt');
+        return;
+      }
+
+      // Ny runde startet av admin — restart kamp-lytter og naviger til baneoversikten
+      if (app.runde > forrigeRunde && forrigeRunde !== 0) {
+        startKampLytter();
+        naviger('baner');
+      }
     },
     feil => visFBFeil('Lyttefeil (økt): ' + (feil?.message ?? feil))
   );
@@ -1138,7 +1164,7 @@ function visBaner() {
     const dobbelMerke = app.er6SpillerFormat
       ? `<span style="font-size:12px;background:rgba(37,99,235,.15);color:var(--accent2);border-radius:4px;padding:2px 7px;font-weight:700;letter-spacing:.5px">🎾 DOBBEL</span>`
       : '';
-    const baneMaksPoeng = bane.maksPoeng ?? (antallSpillere === 5 ? 11 : 17);
+    const baneMaksPoeng = bane.maksPoeng ?? (app.poengPerKamp ?? 17);
     const spillTilMerke = `<span style="font-size:12px;background:rgba(37,99,235,.12);color:var(--accent2);border-radius:4px;padding:2px 7px;font-weight:700;letter-spacing:.3px">Til ${baneMaksPoeng}</span>`;
     return `<div class="kort" style="cursor:pointer" onclick="apnePoenginput(${bane.baneNr})">
       <div class="kort-hode">
@@ -1180,7 +1206,7 @@ function apnePoenginput(baneNr) {
   app.aktivBane = baneNr;
   document.getElementById('poeng-bane-nummer').textContent = baneNr;
   document.getElementById('poeng-bane-stor').textContent   = baneNr;
-  const maksPoeng = bane.maksPoeng ?? (bane.spillere.length === 5 ? 11 : 17);
+  const maksPoeng = bane.maksPoeng ?? (app.poengPerKamp ?? 17);
   document.getElementById('maks-hint').textContent         = maksPoeng;
   document.getElementById('valider-feil').style.display    = 'none';
   const doneBtn = document.getElementById('done-knapp');
@@ -1290,7 +1316,7 @@ function validerInndata(i, endretFelt) {
   const l2   = parseInt(el2.value, 10);
   const bane = (app.baneOversikt ?? []).find(b => b.baneNr === app.aktivBane);
   const erSingelValider = bane?.erSingel === true || (bane?.spillere?.length === 2);
-  const maks = bane?.maksPoeng ?? (erSingelValider ? (app.poengPerKamp ?? 15) : (bane?.spillere?.length === 5 ? 11 : 17));
+  const maks = bane?.maksPoeng ?? (app.poengPerKamp ?? 17);
 
   // Autofyll motstanderens poeng
   let autofylte = false;
@@ -1414,7 +1440,7 @@ function lesOgValiderPoeng() {
   const erSingelLOV = bane?.erSingel === true || (bane?.spillere?.length === 2);
   const erDobbelLOV6 = app.er6SpillerFormat && (bane?.erDobbel === true);
   const parter = erSingelLOV ? PARTER_6_SINGEL : (erDobbelLOV6 ? PARTER_6_DOBBEL : getParter(bane?.spillere?.length ?? 4));
-  const maks   = bane?.maksPoeng ?? (erSingelLOV ? (app.poengPerKamp ?? 15) : (bane?.spillere?.length === 5 ? 11 : 17));
+  const maks   = bane?.maksPoeng ?? (app.poengPerKamp ?? 17);
   const feil = [];
   const poeng = [];
   for (let i = 0; i < parter.length; i++) {
@@ -1435,11 +1461,17 @@ function lesOgValiderPoeng() {
 // NESTE RUNDE + FORFLYTNING
 // ════════════════════════════════════════════════════════
 function visNesteRundeModal() {
-  const erSiste = app.runde >= app.maksRunder;
-  document.getElementById('modal-neste-tekst').textContent = erSiste
-    ? `Runde ${app.runde} er siste runde. Vil du se resultatene og avslutte økten?`
-    : `Runde ${app.runde} av ${app.maksRunder} er ferdig. Vil du se rangeringer og forflytninger?`;
-  document.getElementById('modal-neste').style.display = 'flex';
+  krevAdmin(
+    'Neste runde',
+    'Kun administrator kan gå videre til neste runde. Skriv inn PIN-koden.',
+    () => {
+      const erSiste = app.runde >= app.maksRunder;
+      document.getElementById('modal-neste-tekst').textContent = erSiste
+        ? `Runde ${app.runde} er siste runde. Vil du se resultatene og avslutte økten?`
+        : `Runde ${app.runde} av ${app.maksRunder} er ferdig. Vil du se rangeringer og forflytninger?`;
+      document.getElementById('modal-neste').style.display = 'flex';
+    }
+  );
 }
 window.visNesteRundeModal = visNesteRundeModal;
 
@@ -1535,7 +1567,7 @@ async function visRundeResultat() {
   const forflytninger = erSiste ? {} : beregnForflytninger(app.rangerteBAner);
   const nestKnapp = document.getElementById('neste-runde-resultat-knapp');
   nestKnapp.textContent = erSiste ? 'AVSLUTT ØKT' : 'NESTE RUNDE →';
-  nestKnapp.onclick     = erSiste ? visAvsluttModal : bekreftNesteRunde;
+  nestKnapp.onclick     = erSiste ? visAvsluttModal : () => krevAdmin('Neste runde', 'Kun administrator kan starte neste runde. Skriv inn PIN-koden.', bekreftNesteRunde);
 
   document.getElementById('res-runde-nummer').textContent = app.runde;
   document.getElementById('resultat-innhold').innerHTML = (app.rangerteBAner ?? []).map(bane => {
@@ -1720,7 +1752,7 @@ async function bekreftNesteRunde() {
       const gjeldendeBane = (app.baneOversikt ?? []).find(ob => ob.baneNr === b.baneNr);
       return {
         baneNr:    b.baneNr,
-        maksPoeng: gjeldendeBane?.maksPoeng ?? (b.spillere?.length === 5 ? 11 : 17),
+        maksPoeng: gjeldendeBane?.maksPoeng ?? (app.poengPerKamp ?? 17),
         // For 4-spillerbane: behold plass 2 og 3 (index 1,2)
         // For 5-spillerbane: behold plass 2, 3 og 4 (index 1,2,3)
         spillere: (b.rangert ?? [])
@@ -1965,21 +1997,66 @@ async function avsluttTreningUI() {
     );
     const alleKamper = kamperSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // Hent også siste runde for rangeringsvisning (uendret logikk)
-    const kamperFraDB = alleKamper.filter(k => k?.rundeNr === app.runde);
+    // Finn alle fullførte runder (kamper med registrerte poeng).
+    // Beskytter mot runder som er satt opp men ikke spilt.
+    const harPoeng = k => k != null && k.lag1Poeng != null && k.lag2Poeng != null;
+    const alleKamperMedPoeng = alleKamper.filter(harPoeng);
 
-    if (kamperFraDB.length === 0) {
-      visMelding('Ingen kamper funnet for denne runden. Sjekk at poeng er registrert.', 'advarsel');
+    if (alleKamperMedPoeng.length === 0) {
+      visMelding('Ingen kamper med registrerte poeng funnet. Sjekk at poeng er registrert.', 'advarsel');
       await lossTrening();
       return;
     }
 
-    // ── Beregn rangering (uendret logikk) ────────────────
-    const rangerteBAner = (app.baneOversikt ?? []).map(bane => {
-      const kamper = kamperFraDB.filter(k => k?.baneNr === `bane${bane.baneNr}`);
-      const stats  = beregnSpillerstatistikk(bane.spillere ?? [], kamper);
-      return { baneNr: bane.baneNr, rangert: sorterRangering(stats), erSingel: bane.erSingel ?? false };
+    // ── Beregn sluttrangering på tvers av ALLE fullførte runder ──────────
+    const baneNrListe = [...new Set(alleKamperMedPoeng.map(k => k.baneNr))].sort();
+    const spillerTotaler = {};
+    const fullforteRunder = [...new Set(alleKamperMedPoeng.map(k => k.rundeNr))].sort((a,b) => a-b);
+
+    fullforteRunder.forEach(rundeNr => {
+      baneNrListe.forEach(baneNr => {
+        const kamper = alleKamperMedPoeng.filter(k => k.rundeNr === rundeNr && k.baneNr === baneNr);
+        if (!kamper.length) return;
+        const erSingel = kamper.some(k => k.erSingel === true);
+        const k1 = kamper.find(k => k.kampNr === 1);
+        if (!k1) return;
+        let spillere;
+        if (erSingel) {
+          spillere = [
+            { id: k1.lag1_s1, navn: k1.lag1_s1_navn ?? 'Ukjent' },
+            { id: k1.lag2_s1, navn: k1.lag2_s1_navn ?? 'Ukjent' },
+          ];
+        } else {
+          spillere = [
+            { id: k1.lag1_s1, navn: k1.lag1_s1_navn ?? 'Ukjent' },
+            { id: k1.lag1_s2, navn: k1.lag1_s2_navn ?? 'Ukjent' },
+            { id: k1.lag2_s1, navn: k1.lag2_s1_navn ?? 'Ukjent' },
+            { id: k1.lag2_s2, navn: k1.lag2_s2_navn ?? 'Ukjent' },
+          ].filter(s => s.id);
+          if (k1.hviler_id) spillere.push({ id: k1.hviler_id, navn: k1.hviler_navn ?? 'Ukjent' });
+        }
+        const stats = beregnSpillerstatistikk(spillere, kamper);
+        stats.forEach(s => {
+          if (!s?.spillerId) return;
+          if (!spillerTotaler[s.spillerId]) {
+            spillerTotaler[s.spillerId] = { spillerId: s.spillerId, navn: s.navn, seire: 0, for: 0, imot: 0, diff: 0 };
+          }
+          spillerTotaler[s.spillerId].seire += s.seire ?? 0;
+          spillerTotaler[s.spillerId].for   += s.for   ?? 0;
+          spillerTotaler[s.spillerId].imot  += s.imot  ?? 0;
+          spillerTotaler[s.spillerId].diff  += s.diff  ?? 0;
+        });
+      });
     });
+
+    const alleSpillere = Object.values(spillerTotaler)
+      .sort((a, b) => b.seire - a.seire || b.diff - a.diff || b.for - a.for);
+
+    const rangerteBAner = [{
+      baneNr: 1,
+      erSingel: false,
+      rangert: alleSpillere.map((s, i) => ({ ...s, baneRang: i + 1 })),
+    }];
 
     const tsSnap = await getDocs(
       query(collection(db, SAM.TS), where('treningId', '==', app.treningId))
@@ -2078,6 +2155,7 @@ async function avsluttTreningUI() {
     app.baneOversikt = [];
     app.venteliste   = [];
     kampStatusCache  = {};
+    erAdmin          = false; // nullstill admin-status ved avslutning
     naviger('slutt');
   } catch (e) {
     console.error('[avsluttTreningUI]', e);
@@ -2095,14 +2173,43 @@ window.avsluttTreningUI = avsluttTreningUI;
 // ════════════════════════════════════════════════════════
 // SLUTTRESULTAT
 // ════════════════════════════════════════════════════════
-function visSluttresultat() {
-  if (!app.ratingEndringer?.length) {
+async function visSluttresultat() {
+  let data = app.ratingEndringer ?? [];
+
+  if (!data.length && db) {
+    document.getElementById('ledertavle').innerHTML =
+      '<div style="padding:20px;text-align:center;color:var(--muted2)">Laster resultater…</div>';
+    try {
+      const treningId = app.treningId || sessionStorage.getItem('aktivTreningId');
+      if (treningId) {
+        const resSnap = await getDocs(
+          query(collection(db, SAM.RESULTATER), where('treningId', '==', treningId))
+        );
+        data = resSnap.docs
+          .map(d => d.data())
+          .sort((a, b) => a.sluttPlassering - b.sluttPlassering)
+          .map(r => ({
+            spillerId:       r.spillerId,
+            navn:            r.spillerNavn ?? 'Ukjent',
+            sluttPlassering: r.sluttPlassering,
+            nyRating:        r.ratingEtter,
+            ratingVedStart:  r.ratingFor,
+            endring:         r.ratingEndring,
+          }));
+      }
+    } catch (e) {
+      console.warn('[visSluttresultat] Kunne ikke hente fra Firestore:', e?.message ?? e);
+    }
+  }
+
+  if (!data.length) {
     document.getElementById('ledertavle').innerHTML =
       '<div style="padding:20px;text-align:center;color:var(--muted2)">Ingen økt avsluttet ennå</div>';
     document.getElementById('rating-endringer').innerHTML = '';
     return;
   }
-  document.getElementById('ledertavle').innerHTML = app.ratingEndringer.map(s => {
+
+  document.getElementById('ledertavle').innerHTML = data.map(s => {
     const ini = (s.navn ?? '?').split(' ').map(w => w[0] ?? '').join('').slice(0,2).toUpperCase() || '?';
     return `<div class="lb-rad" onclick="apneProfil('${s.spillerId}')">
       <div class="lb-plass${s.sluttPlassering <= 3 ? ' topp3' : ''}">${s.sluttPlassering}</div>
@@ -2115,7 +2222,7 @@ function visSluttresultat() {
     </div>`;
   }).join('');
 
-  document.getElementById('rating-endringer').innerHTML = app.ratingEndringer.map(s => `
+  document.getElementById('rating-endringer').innerHTML = data.map(s => `
     <div class="lb-rad" style="cursor:default">
       <div style="flex:1;font-size:17px">${s.navn ?? 'Ukjent'}</div>
       <div style="font-family:'DM Mono',monospace;font-size:15px;color:var(--muted2);margin-right:10px">${s.ratingVedStart ?? STARTRATING} → ${s.nyRating}</div>
@@ -3736,6 +3843,7 @@ function nyTrening() {
   kampStatusCache     = {};
   kampStatCache.clear();
   _sesongCache        = null;
+  erAdmin             = false; // nullstill admin-status ved ny økt
   sessionStorage.removeItem('aktivTreningId');
   const sokEl = document.getElementById('sok-inndata');
   if (sokEl) sokEl.value = '';
@@ -3913,3 +4021,33 @@ async function init() {
 }
 
 init();
+
+// Når bruker kommer tilbake til appen etter å ha hatt den i bakgrunnen,
+// sjekk om runden har endret seg eller økten er avsluttet.
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible') return;
+  if (!db || !app.treningId) return;
+  try {
+    const snap = await getDoc(doc(db, SAM.TRENINGER, app.treningId));
+    if (!snap.exists()) return;
+    const data = snap.data() ?? {};
+
+    // Økt avsluttet av admin mens bruker var borte
+    if (data.status === 'avsluttet') {
+      if (app.treningId) sessionStorage.setItem('aktivTreningId', app.treningId);
+      stoppLyttere();
+      naviger('slutt');
+      return;
+    }
+
+    // Ny runde startet av admin mens bruker var borte
+    const nyRunde = data.gjeldendRunde ?? app.runde;
+    if (nyRunde > app.runde) {
+      app.runde = nyRunde;
+      oppdaterRundeUI();
+      startKampLytter();
+      visBanerDebounced();
+      naviger('baner');
+    }
+  } catch (_) {}
+});
