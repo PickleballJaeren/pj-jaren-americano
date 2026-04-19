@@ -1,0 +1,540 @@
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#050f1f;--navy2:#0b1a30;--navy3:#0f2040;
+  --blue:#1a3d7c;--accent:#2563eb;--accent2:#3b82f6;
+  --green:#16a34a;--green2:#22c55e;--yellow:#eab308;
+  --red:#dc2626;--red2:#ef4444;--orange:#ea580c;
+  --white:#f1f5f9;--muted:#64748b;--muted2:#94a3b8;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+.screen{display:none;min-height:100vh;flex-direction:column;animation:fadeUp .28s ease both}
+.screen.active{display:flex}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideInnFraHoyre{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInnFraVenstre{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
+.screen.sveip-hoyre{animation:slideInnFraVenstre .25s ease both}
+.screen.sveip-venstre{animation:slideInnFraHoyre .25s ease both}
+.app-header{background:linear-gradient(180deg,var(--navy2) 0%,transparent 100%);padding:16px 20px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.app-logo{width:42px;height:42px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:1px;color:#fff;box-shadow:0 4px 16px rgba(37,99,235,0.4)}
+.app-name{font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:2px;line-height:1}
+.app-sub{font-size:15px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.header-right{margin-left:auto;display:flex;gap:8px}
+.tilbake-btn{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:28px;line-height:1;padding:0;flex-shrink:0}
+.bunn-nav{position:fixed;bottom:0;left:0;right:0;background:var(--navy2);border-top:1px solid var(--border2);display:flex;z-index:200;padding-bottom:var(--safe-bottom)}
+.nav-knapp{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 8px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .15s;font-size:15px;font-weight:600;letter-spacing:.8px;text-transform:uppercase}
+.nav-knapp svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-knapp.aktiv{color:var(--yellow)}
+.nav-knapp.aktiv svg{filter:drop-shadow(0 0 5px rgba(234,179,8,.5))}
+.scroll-omrade{flex:1;overflow-y:auto;padding:18px 16px calc(110px + env(safe-area-inset-bottom, 0px));max-width:480px;margin:0 auto;width:100%}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.seksjon-etikett{font-size:15px;text-transform:uppercase;letter-spacing:2px;color:var(--accent2);font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.seksjon-etikett::after{content:'';flex:1;height:1px;background:var(--border)}
+.config-etikett{font-size:15px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);margin-bottom:6px;font-weight:600}
+.kort{background:var(--navy2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.kort-hode{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.kort-innhold{padding:14px 16px}
+.trinn{display:flex;align-items:center;background:#060e1c;border:1px solid var(--border);border-radius:12px;overflow:hidden;height:52px}
+.trinn-knapp{width:38px;height:52px;background:none;border:none;color:var(--muted2);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.trinn-knapp:active{background:rgba(255,255,255,0.06);color:var(--white)}
+.trinn-verdi{flex:1;text-align:center;font-family:'Bebas Neue',cursive;font-size:30px;color:var(--yellow);min-width:0}
+.sokeboks{display:flex;align-items:center;gap:10px;background:#060e1c;border:1px solid var(--border2);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.sokeboks input{flex:1;background:none;border:none;color:var(--white);font-family:'DM Sans',sans-serif;font-size:19px;outline:none}
+.sokeboks input::placeholder{color:var(--muted)}
+.legg-til-rad{display:flex;gap:8px;margin-bottom:10px}
+.legg-til-rad input{flex:1;background:#060e1c;border:1px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:18px;outline:none;transition:border-color .15s}
+.legg-til-rad input:focus{border-color:var(--accent)}
+.spillerliste{display:flex;flex-direction:column;gap:6px}
+.spiller-element{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#060e1c;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .12s;user-select:none}
+.spiller-element.valgt{border-color:var(--green);background:rgba(22,163,74,0.09)}
+.spiller-element.ventende{border-color:var(--orange);background:rgba(234,88,12,0.07)}
+.spiller-avatar{width:38px;height:38px;border-radius:10px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:18px;flex-shrink:0}
+.spiller-element.valgt .spiller-avatar{background:var(--green)}
+.spiller-element.ventende .spiller-avatar{background:var(--orange)}
+.spiller-hake{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.spiller-element.valgt .spiller-hake{background:var(--green);border-color:var(--green)}
+.vl-merke{font-size:15px;font-weight:700;background:var(--orange);color:#fff;border-radius:4px;padding:2px 6px;flex-shrink:0}
+.venteliste-boks{background:rgba(234,88,12,0.08);border:1px solid rgba(234,88,12,0.25);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.venteliste-tittel{font-size:15px;text-transform:uppercase;letter-spacing:1.5px;color:var(--orange);font-weight:700;margin-bottom:8px}
+.vl-rad{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(234,88,12,0.12);font-size:17px}
+.vl-rad:last-child{border-bottom:none}
+.vl-pos{font-family:'DM Mono',monospace;font-size:15px;color:var(--orange);width:20px;flex-shrink:0}
+.knapp{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border-radius:14px;border:none;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;transition:transform .1s,opacity .15s;-webkit-tap-highlight-color:transparent}
+.knapp:active{transform:scale(0.97);opacity:.9}
+.knapp-primaer{background:var(--accent);color:#fff;box-shadow:0 4px 20px rgba(37,99,235,0.35)}
+.knapp-primaer:disabled{background:var(--muted);box-shadow:none;cursor:not-allowed;opacity:.5;transform:none}
+.knapp-gronn{background:var(--green);color:#fff;box-shadow:0 4px 20px rgba(22,163,74,0.3)}
+.knapp-gronn:disabled{background:var(--muted);box-shadow:none;cursor:not-allowed;opacity:.5;transform:none}
+.knapp-omriss{background:transparent;border:1px solid var(--border2);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:18px;padding:11px;letter-spacing:.4px}
+.knapp-liten{padding:9px 16px;font-size:18px;width:auto;border-radius:10px;letter-spacing:1px}
+.knapp-fare{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(220,38,38,0.3)}
+.bane-nummer-stor{font-family:'Bebas Neue',cursive;font-size:58px;letter-spacing:4px;color:var(--accent);line-height:1}
+.kamp-rad{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
+.kamp-rad:last-child{border-bottom:none}
+.kamp-nummer{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;width:26px;flex-shrink:0}
+.kamp-lag{color:var(--muted2);font-size:17px}
+.kamp-mot{font-size:15px;color:var(--muted);margin:2px 0}
+.kamp-poeng-merke{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;flex-shrink:0}
+.poeng-ferdig{color:var(--green2)}
+.poeng-mangler{color:var(--muted)}
+.poeng-hero{text-align:center;padding:18px 0 10px}
+.poeng-hero-nummer{font-family:'Bebas Neue',cursive;font-size:88px;letter-spacing:8px;color:var(--accent);line-height:1}
+.poeng-hero-etikett{font-size:15px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);margin-top:2px}
+.kamp-kort{background:var(--navy3);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;transition:border-color .2s}
+.kamp-kort.ugyldig{border-color:var(--red)}
+.kamp-hode{padding:10px 14px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);font-size:15px;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);display:flex;justify-content:space-between;align-items:center}.kamp-merke{font-size:15px;padding:2px 8px;border-radius:20px;background:rgba(37,99,235,.15);color:var(--accent2);font-weight:600}
+.lag-rad{display:flex;align-items:center;gap:8px;padding:14px}
+.lag-boks{flex:1}
+.lag-navn{font-size:15px;font-weight:500;margin-bottom:8px;color:var(--muted2);line-height:1.4;min-height:32px}
+.poeng-inndata{width:100%;background:#060e1c;border:2px solid var(--border2);border-radius:10px;padding:13px 10px;font-family:'Bebas Neue',cursive;font-size:40px;color:var(--white);text-align:center;outline:none;transition:border-color .15s;-moz-appearance:textfield}
+.poeng-inndata::-webkit-outer-spin-button,.poeng-inndata::-webkit-inner-spin-button{-webkit-appearance:none}
+.poeng-inndata:focus{border-color:var(--yellow)}
+.poeng-inndata.ugyldig{border-color:var(--red)!important}
+.vs-deler{font-family:'Bebas Neue',cursive;font-size:19px;color:var(--muted);letter-spacing:1px;flex-shrink:0}
+.poeng-tips{text-align:center;font-size:15px;color:var(--muted);margin:4px 0 10px;padding:6px 12px;background:rgba(37,99,235,.07);border-radius:8px}
+.feil-boks{display:none;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:17px;color:var(--red2);line-height:1.6}
+.forflytning-merke{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:15px;font-weight:700;flex-shrink:0}
+.fm-opp{background:rgba(22,163,74,.15);color:var(--green2)}
+.fm-ned{background:rgba(220,38,38,.12);color:var(--red2)}
+.fm-blir{background:rgba(100,116,139,.12);color:var(--muted2)}
+.fm-ut{background:rgba(234,88,12,.15);color:var(--orange)}
+.rang-rad{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.rang-rad:last-child{border-bottom:none}
+.rang-nummer{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:19px;flex-shrink:0}
+.rn-1{background:rgba(234,179,8,.18);color:var(--yellow)}
+.rn-2{background:rgba(37,99,235,.15);color:var(--accent2)}
+.rn-3{background:rgba(37,99,235,.1);color:var(--accent2)}
+.rn-4{background:rgba(220,38,38,.12);color:var(--red2)}
+.rang-navn{flex:1;font-size:18px;font-weight:500}
+.rang-statistikk{font-family:'DM Mono',monospace;font-size:15px;color:var(--muted);margin-right:6px}
+.lb-rad{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.lb-rad:last-child{border-bottom:none}
+.lb-rad:active{background:rgba(255,255,255,.02)}
+.lb-plass{font-family:'Bebas Neue',cursive;font-size:28px;width:36px;text-align:center;color:var(--muted);flex-shrink:0}
+.lb-plass.topp3{color:var(--accent2)}
+.lb-avatar{width:40px;height:40px;border-radius:10px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:22px;flex-shrink:0}
+.lb-navn{flex:1;font-size:19px;font-weight:500}
+.lb-endring{font-family:'DM Mono',monospace;font-size:17px;font-weight:600}
+.lb-endring.pos{color:var(--green2)}
+.lb-endring.neg{color:var(--red2)}
+.rating-hero{text-align:center;padding:24px 0 18px}
+.rating-stor{font-family:'Bebas Neue',cursive;font-size:88px;letter-spacing:4px;color:var(--yellow);line-height:1}
+.rating-etikett{font-size:15px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);margin-top:4px}
+.stat-rutenett{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-boks{background:#060e1c;border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center}
+.stat-verdi{font-family:'Bebas Neue',cursive;font-size:32px;line-height:1}
+.stat-etikett{font-size:15px;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-top:4px}
+.diagram-beholder{background:#060e1c;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+.historikk-rad{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:17px}
+.historikk-rad:last-child{border-bottom:none}
+.runde-indikator{display:flex;align-items:center;gap:8px;padding:9px 14px;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.2);border-radius:10px;margin-bottom:12px;font-size:17px;color:var(--accent2);font-weight:500}
+.runde-prikk-live{width:8px;height:8px;border-radius:50%;background:var(--green2);box-shadow:0 0 8px rgba(34,197,94,.6);animation:puls 1.5s ease-in-out infinite;flex-shrink:0}
+@keyframes puls{0%,100%{opacity:1}50%{opacity:.35}}
+.fremgang-beholder{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.fremgang-prikk{width:10px;height:10px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.fremgang-prikk.ferdig{background:var(--green2)}
+.fremgang-prikk.aktiv{background:var(--yellow);box-shadow:0 0 8px rgba(234,179,8,.5)}
+.fremgang-tekst{font-size:15px;color:var(--muted2);margin-left:4px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(22,163,74,.95);color:#fff;padding:11px 22px;border-radius:10px;font-size:17px;font-weight:600;opacity:0;transition:all .25s;z-index:999;white-space:nowrap;pointer-events:none;max-width:90vw;text-align:center}
+.toast.vis{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.feil{background:rgba(220,38,38,.92)}
+.toast.advarsel{background:rgba(234,88,12,.92)}
+.modal-bakgrunn{position:fixed;inset:0;background:rgba(3,9,18,.88);z-index:500;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--navy2);border:1px solid var(--border2);border-radius:22px 22px 0 0;padding:24px 20px calc(36px + var(--safe-bottom));width:100%;max-width:480px}
+.modal-tittel{font-family:'Bebas Neue',cursive;font-size:30px;letter-spacing:2px;margin-bottom:8px}
+.modal-tekst{font-size:18px;color:var(--muted2);margin-bottom:22px;line-height:1.65}
+.modal-knapper{display:flex;gap:10px}
+.firebase-banner{background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:17px;color:var(--red2);display:none}
+.firebase-banner.vis{display:flex;align-items:center;gap:8px}
+.laster{display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;color:var(--muted2);font-size:18px}
+.laster-snurr{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:snurr .8s linear infinite}
+@keyframes snurr{to{transform:rotate(360deg)}}
+.config-rutenett{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+@media(max-width:360px){.config-rutenett{grid-template-columns:1fr;gap:8px}}
+
+/* ── NIVÅ-FARGEKODING ── */
+/* Terskel: <950 = lav (rød), 950–1050 = middels (gul), >1050 = høy (grønn) */
+.nivaa-lav  { --nivaa-farge:var(--red2);  --nivaa-bg:rgba(220,38,38,0.07);  --nivaa-kant:var(--red2);  }
+.nivaa-mid  { --nivaa-farge:var(--yellow);--nivaa-bg:rgba(234,179,8,0.06); --nivaa-kant:var(--yellow); }
+.nivaa-hoey { --nivaa-farge:var(--green2);--nivaa-bg:rgba(34,197,94,0.07); --nivaa-kant:var(--green2);}
+
+/* Dot-indikator */
+.nivaa-dot{
+  display:inline-block;width:8px;height:8px;border-radius:50%;
+  margin-right:5px;vertical-align:middle;flex-shrink:0;
+  background:var(--nivaa-farge,var(--muted2));
+}
+/* Farget rating-tall */
+.nivaa-rating{color:var(--nivaa-farge,var(--muted2));font-weight:600}
+
+/* Nivå-label (🔴 Ny / 🟡 Middels / 🟢 Sterk) */
+.nivaa-label{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:12px;font-weight:600;letter-spacing:.4px;
+  padding:2px 7px;border-radius:20px;
+  color:var(--nivaa-farge,var(--muted2));
+  background:var(--nivaa-bg,transparent);
+  border:1px solid var(--nivaa-kant,var(--border));
+  white-space:nowrap;flex-shrink:0;
+}
+
+/* Rad-bakgrunn — subtil, mørk-modus-vennlig */
+.spiller-element.nivaa-lav,
+.spiller-element.nivaa-mid,
+.spiller-element.nivaa-hoey { background:var(--nivaa-bg); }
+
+.spiller-element.nivaa-lav  { border-left:3px solid var(--red2);   }
+.spiller-element.nivaa-mid  { border-left:3px solid var(--yellow);  }
+.spiller-element.nivaa-hoey { border-left:3px solid var(--green2);  }
+
+/* Valgt/ventende overstyrer bakgrunn (eksisterende prioritet bevares) */
+.spiller-element.valgt   { background:rgba(22,163,74,0.09)  !important; border-left-color:var(--green)  !important; }
+.spiller-element.ventende{ background:rgba(234,88,12,0.07)   !important; border-left-color:var(--orange) !important; }
+
+/* Rang-rad */
+.rang-rad.nivaa-lav  { border-left:3px solid var(--red2);   background:var(--nivaa-bg); }
+.rang-rad.nivaa-mid  { border-left:3px solid var(--yellow);  background:var(--nivaa-bg); }
+.rang-rad.nivaa-hoey { border-left:3px solid var(--green2);  background:var(--nivaa-bg); }
+
+/* Ledertavle-rad */
+.lb-rad.nivaa-lav  { border-left:3px solid var(--red2);   background:var(--nivaa-bg); }
+.lb-rad.nivaa-mid  { border-left:3px solid var(--yellow);  background:var(--nivaa-bg); }
+.lb-rad.nivaa-hoey { border-left:3px solid var(--green2);  background:var(--nivaa-bg); }
+
+/* ── KAMPSTATISTIKK ── */
+.kampstat-rutenett{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.kampstat-boks{background:#060e1c;border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center}
+.kampstat-verdi{font-family:'Bebas Neue',cursive;font-size:30px;line-height:1}
+.kampstat-etikett{font-size:14px;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-top:4px}
+.beste-partner-boks{background:#060e1c;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.beste-partner-avatar{width:40px;height:40px;border-radius:10px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:18px;flex-shrink:0}
+.beste-partner-info{flex:1}
+.beste-partner-navn{font-size:17px;font-weight:600}
+.beste-partner-stat{font-size:14px;color:var(--muted2);margin-top:2px}
+.kampstat-laster{font-size:14px;color:var(--muted2);text-align:center;padding:12px 0}
+
+/* Trend */
+.trend-boks{display:flex;align-items:center;gap:12px;background:#060e1c;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.trend-pil{font-size:36px;line-height:1;flex-shrink:0}
+.trend-info{flex:1}
+.trend-tittel{font-size:16px;font-weight:600}
+.trend-sub{font-size:14px;color:var(--muted2);margin-top:2px}
+.trend-endring{font-family:'DM Mono',monospace;font-size:20px;font-weight:700;flex-shrink:0}
+
+/* Form-badges */
+.form-rekke{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.form-badge{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:17px;font-weight:700;flex-shrink:0}
+.form-badge-W{background:rgba(34,197,94,.18);color:var(--green2);border:1px solid rgba(34,197,94,.3)}
+.form-badge-L{background:rgba(220,38,38,.14);color:var(--red2);border:1px solid rgba(220,38,38,.25)}
+.form-badge-tom{background:rgba(100,116,139,.1);color:var(--muted);border:1px dashed var(--border2)}
+
+/* ── HJEMSKJERM ── */
+.hjem-logo-fallback{
+  width: min(65vw, 200px);
+  height: min(65vw, 200px);
+  border-radius: 50%;
+  padding: 22px;
+  box-sizing: border-box;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 16px;
+  background: linear-gradient(135deg,var(--navy2),var(--navy3));
+  border: 3px solid var(--border2);
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+
+.hjem-logo{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display:block;
+}
+.hjem-tittel{
+  font-family:'Bebas Neue',cursive;font-size:42px;letter-spacing:3px;
+  text-align:center;line-height:1;color:var(--white);margin-bottom:6px;
+}
+.hjem-undertittel{
+  font-size:22px;text-align:center;color:var(--muted2);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:28px;
+}
+.hjem-status-boks{
+  display:flex;align-items:center;gap:10px;
+  background:var(--navy2);border:1px solid var(--border2);
+  border-radius:14px;padding:14px 18px;margin-bottom:24px;
+}
+.hjem-status-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+  background:var(--muted2);
+}
+.hjem-status-dot.aktiv{
+  background:var(--green2);
+  box-shadow:0 0 8px rgba(34,197,94,.6);
+  animation:puls 1.5s ease-in-out infinite;
+}
+.hjem-status-tekst{font-size:16px;font-weight:500;flex:1}
+.hjem-status-sub{font-size:14px;color:var(--muted2);margin-top:2px}
+.hjem-seksjon{margin-bottom:24px}
+.hjem-seksjon-tittel{
+  font-size:14px;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--muted2);font-weight:600;margin-bottom:10px;
+}
+.hjem-knapper{display:flex;flex-direction:column;gap:10px}
+.hjem-knapp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hjem-nav-knapp{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;padding:20px 10px;border-radius:14px;border:1px solid var(--border2);
+  background:var(--navy2);color:var(--white);cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+  transition:background .15s,transform .1s;
+}
+.hjem-nav-knapp:active{transform:scale(0.97);background:var(--navy3)}
+.hjem-nav-knapp svg{width:24px;height:24px;stroke:var(--accent2);fill:none;stroke-width:1.8}
+.hjem-nav-knapp-tekst{color:var(--white)}
+.hjem-divider{height:1px;background:var(--border);margin:20px 0}
+
+/* ── FERDIG-KNAPP (lukker tastatur på iPad) ── */
+.done-knapp{
+  display:block;width:100%;padding:12px;margin-bottom:10px;
+  background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);
+  border-radius:10px;color:var(--accent2);font-family:'DM Sans',sans-serif;
+  font-size:16px;font-weight:600;cursor:pointer;text-align:center;
+  letter-spacing:.5px;
+}
+.done-knapp:active{background:rgba(37,99,235,.2)}
+
+/* Autosave-statusindikator per kamp */
+.kamp-status{
+  display:flex;align-items:center;gap:6px;
+  font-size:14px;font-weight:600;padding:6px 0 2px;
+  min-height:24px;
+}
+.kamp-status.lagrer{ color:var(--muted2); }
+.kamp-status.lagret{ color:var(--green2); }
+.kamp-status.feil-status{ color:var(--red2); }
+
+/* ── PIN-MODAL ── */
+.pin-felt{
+  display:flex;gap:10px;justify-content:center;margin:16px 0 8px;
+}
+.pin-siffer{
+  width:52px;height:64px;background:#060e1c;border:2px solid var(--border2);
+  border-radius:12px;font-family:'Bebas Neue',cursive;font-size:36px;
+  color:var(--white);text-align:center;outline:none;
+  -moz-appearance:textfield;transition:border-color .15s;
+  -webkit-text-security:disc; /* skjuler tegn som prikker på iOS/Safari */
+}
+.pin-siffer::-webkit-outer-spin-button,.pin-siffer::-webkit-inner-spin-button{-webkit-appearance:none}
+.pin-siffer:focus{border-color:var(--yellow)}
+.pin-feil{color:var(--red2);font-size:17px;text-align:center;margin-bottom:8px;min-height:18px}
+.admin-merke{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:15px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  background:rgba(37,99,235,.18);color:var(--accent2);
+  border:1px solid rgba(37,99,235,.3);border-radius:4px;padding:2px 7px;
+  margin-left:8px;vertical-align:middle;
+}
+.sammenlign-velger{
+  width:100%;background:#060e1c;border:1px solid var(--border2);
+  border-radius:10px;padding:11px 12px;color:var(--white);
+  font-family:'DM Sans',sans-serif;font-size:16px;outline:none;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+  cursor:pointer;
+}
+.sammenlign-velger:focus{border-color:var(--accent)}
+.sammenlign-velger option{background:#0b1a30}
+
+/* ── SPILLMODUS-VELGER ── */
+.modus-velger{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;
+}
+.modus-knapp{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:14px 10px;border-radius:12px;border:2px solid var(--border2);
+  background:transparent;color:var(--muted2);cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  letter-spacing:.4px;transition:all .15s;-webkit-tap-highlight-color:transparent;
+}
+.modus-knapp:active{transform:scale(0.97);}
+.modus-ikon{font-size:26px;line-height:1;}
+.modus-tekst{font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+
+/* Konkurranse — aktiv */
+.modus-knapp#modus-knapp-konkurranse.modus-aktiv{
+  border-color:var(--yellow);
+  background:rgba(234,179,8,.08);
+  color:var(--yellow);
+  box-shadow:0 0 16px rgba(234,179,8,.15);
+}
+/* Mix & Match — aktiv */
+.modus-knapp#modus-knapp-mix.modus-aktiv{
+  border-color:var(--green2);
+  background:rgba(34,197,94,.08);
+  color:var(--green2);
+  box-shadow:0 0 16px rgba(34,197,94,.15);
+}
+
+.modus-info{
+  font-size:15px;color:var(--muted2);line-height:1.6;
+  padding:10px 12px;background:rgba(255,255,255,.03);
+  border-radius:10px;border:1px solid var(--border);
+}
+
+/* Mix & Match — melding under runderesultat om at lag stokkes om */
+.mix-neste-info{
+  display:flex;align-items:center;gap:6px;
+  margin-top:10px;padding:8px 12px;
+  background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);
+  border-radius:8px;font-size:14px;color:var(--green2);font-weight:600;
+  letter-spacing:.3px;
+}
+
+/* ── Info-boksen for Mix & Match på oppsett-skjermen ── */
+.modus-info-mix{
+  background:rgba(34,197,94,.05);
+  border-color:rgba(34,197,94,.2);
+}
+.mix-info-rad{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:15px;color:var(--muted2);line-height:1.5;
+  padding:3px 0;
+}
+.mix-info-rad strong{ color:var(--green2); }
+
+/* ── Sluttresultat Mix & Match banner ── */
+.mix-slutt-intro{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(34,197,94,.08);
+  border:1px solid rgba(34,197,94,.25);
+  border-radius:14px;padding:16px 18px;
+  margin-bottom:10px;
+}
+.mix-slutt-intro-ikon{ font-size:32px;line-height:1;flex-shrink:0; }
+.mix-slutt-intro-tittel{
+  font-family:'Bebas Neue',cursive;font-size:24px;
+  letter-spacing:1.5px;color:var(--green2);line-height:1;
+}
+.mix-slutt-intro-sub{
+  font-size:14px;color:var(--muted2);margin-top:4px;
+}
+.mix-slutt-pills{
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;
+}
+.mix-slutt-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:20px;
+  background:rgba(34,197,94,.1);
+  border:1px solid rgba(34,197,94,.2);
+  font-size:13px;color:var(--green2);font-weight:600;
+}
+
+/* ── MIX & MATCH — SPILLERKORT (sluttresultat) ── */
+.mix-spiller-kort{
+  background:var(--navy2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:10px;
+  transition:border-color .15s;
+}
+/* Topp-plassert kort — grønt aksent-skjema */
+.mix-spiller-kort-topp{
+  border-color:rgba(34,197,94,.4);
+  background:linear-gradient(135deg, rgba(34,197,94,.06) 0%, var(--navy2) 60%);
+}
+
+/* Øvre rad: avatar + meta + poengboks */
+.mix-spiller-hoved{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px 10px;
+}
+.mix-spiller-avatar{
+  width:42px;height:42px;border-radius:11px;
+  background:var(--blue);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',cursive;font-size:19px;
+  flex-shrink:0;color:#fff;
+}
+.mix-spiller-avatar-topp{
+  background:var(--green);
+  box-shadow:0 0 14px rgba(22,163,74,.35);
+}
+.mix-spiller-meta{ flex:1;min-width:0; }
+.mix-spiller-navn{
+  font-size:17px;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mix-spiller-ros{
+  font-size:13px;color:var(--muted2);margin-top:2px;
+}
+
+/* Utmerkelse-merker */
+.mix-utmerkelser{
+  display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;
+}
+.mix-utmerkelse{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 7px;border-radius:20px;
+  font-size:12px;font-weight:700;letter-spacing:.3px;
+  background:rgba(234,179,8,.12);
+  border:1px solid rgba(234,179,8,.25);
+  color:var(--yellow);
+}
+
+/* Totalpoeng-boks (høyre) */
+.mix-poeng-boks{
+  text-align:center;flex-shrink:0;
+  padding:6px 12px;
+  background:rgba(255,255,255,.04);
+  border-radius:10px;
+  border:1px solid var(--border);
+}
+.mix-poeng-boks-topp{
+  background:rgba(34,197,94,.12);
+  border-color:rgba(34,197,94,.3);
+}
+.mix-poeng-tal{
+  font-family:'Bebas Neue',cursive;
+  font-size:32px;line-height:1;
+  color:var(--white);
+}
+.mix-poeng-boks-topp .mix-poeng-tal{ color:var(--green2); }
+.mix-poeng-lbl{
+  font-size:11px;text-transform:uppercase;
+  letter-spacing:1px;color:var(--muted2);
+  margin-top:1px;
+}
+
+/* Statistikk-rad: kamper · seire · winrate */
+.mix-statistikk-rad{
+  display:flex;border-top:1px solid var(--border);
+}
+.mix-stat-celle{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;
+  padding:8px 4px;
+  border-right:1px solid var(--border);
+}
+.mix-stat-celle:last-child{ border-right:none; }
+.mix-stat-verdi{
+  font-family:'DM Mono',monospace;
+  font-size:16px;font-weight:600;color:var(--white);
+  line-height:1;
+}
+.mix-stat-lbl{
+  font-size:11px;text-transform:uppercase;
+  letter-spacing:1px;color:var(--muted2);margin-top:3px;
+}
+
+/* ── BANE-NAVIGASJON (Forrige / Neste) i poengregistrering ── */
+.poeng-nav{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  margin-top:16px;
+}
+
+}
