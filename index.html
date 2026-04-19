@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Pb Jæren Americano</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+<!-- SKJERM 1 — OPPSETT -->
+<div id="skjerm-oppsett" class="screen active">
+  <div class="app-header">
+    <div class="app-logo">PB</div>
+    <div>
+      <div class="app-name" id="oppsett-klubbnavn">Pb Jæren</div>
+      <div class="app-sub">Americano</div>
+    </div>
+    <div class="header-right" id="oppsett-tilbake-boks" style="display:none">
+      <button class="knapp knapp-omriss knapp-liten" onclick="naviger('hjem')">← Avbryt</button>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <div class="firebase-banner" id="firebase-feil-banner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="firebase-feil-tekst">Feil ved tilkobling til Firebase.</span>
+    </div>
+    <div class="seksjon-etikett">Spillmodus</div>
+    <div class="kort"><div class="kort-innhold">
+      <div class="modus-velger">
+        <button id="modus-knapp-konkurranse" class="modus-knapp modus-aktiv" onclick="settSpillModus('konkurranse')">
+          <span class="modus-ikon">🏆</span>
+          <span class="modus-tekst">Konkurranse</span>
+        </button>
+        <button id="modus-knapp-mix" class="modus-knapp" onclick="settSpillModus('mix')">
+          <span class="modus-ikon">🎲</span>
+          <span class="modus-tekst">Mix &amp; Match</span>
+        </button>
+      </div>
+      <div id="modus-info-konkurranse" class="modus-info">
+        <strong style="color:var(--yellow)">Konkurranse</strong> — Rating, opprykk/nedrykk og nivåinndeling. Spillere fordeles etter rating.
+      </div>
+      <div id="modus-info-mix" class="modus-info modus-info-mix" style="display:none">
+        <div class="mix-info-rad">🎲 <span>Ny partner <strong>hver runde</strong> — alltid nye lag</span></div>
+        <div class="mix-info-rad">😄 <span>Sosial spilling — <strong>uten press</strong></span></div>
+        <div class="mix-info-rad">🤝 <span>Spill, ha det gøy og bli kjent</span></div>
+        <div class="mix-info-rad" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(34,197,94,.15);font-size:13px;color:var(--muted2)">Ingen rating · Ingen opprykk · Ingen nedrykk</div>
+      </div>
+    </div></div>
+    <div class="seksjon-etikett">Konfigurasjon</div>
+    <div class="kort"><div class="kort-innhold">
+      <div class="config-rutenett">
+        <div>
+          <div class="config-etikett">Baner</div>
+          <div class="trinn">
+            <button class="trinn-knapp" onclick="juster('baner',-1)">−</button>
+            <div class="trinn-verdi" id="verdi-baner">3</div>
+            <button class="trinn-knapp" onclick="juster('baner',1)">+</button>
+          </div>
+        </div>
+        <div>
+          <div class="config-etikett">Poeng/kamp</div>
+          <div class="trinn">
+            <button class="trinn-knapp" onclick="juster('poeng',-1)">−</button>
+            <div class="trinn-verdi" id="verdi-poeng">15</div>
+            <button class="trinn-knapp" onclick="juster('poeng',1)">+</button>
+          </div>
+        </div>
+        <div>
+          <div class="config-etikett">Runder</div>
+          <div class="trinn">
+            <button class="trinn-knapp" onclick="juster('runder',-1)">−</button>
+            <div class="trinn-verdi" id="verdi-runder">4</div>
+            <button class="trinn-knapp" onclick="juster('runder',1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div id="spiller-info" style="text-align:center;font-size:16px;color:var(--muted2)">
+        Minst <span id="min-antall" style="color:var(--yellow);font-weight:700">12</span> spillere
+        <span style="color:var(--muted)">— ekstra settes på venteliste</span>
+      </div>
+    </div></div>
+    <div class="seksjon-etikett">Velg deltakere</div>
+    <div class="kort"><div class="kort-innhold">
+      <div class="legg-til-rad">
+        <input id="ny-spiller-inndata" placeholder="Legg til ny deltaker…" onkeydown="if(event.key==='Enter')leggTilSpiller()" onfocus="const s=document.getElementById('sok-inndata');if(s&&s.value){s.value='';visSpillere();}"/>
+        <button class="knapp knapp-primaer knapp-liten" onclick="leggTilSpiller()">Legg til</button>
+      </div>
+
+      <!-- Søkefelt (finner alle spillere) -->
+      <div class="sokeboks">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="sok-inndata" placeholder="Søk alle deltakere…"/>
+      </div>
+
+      <!-- Siste deltakere-knapp -->
+      <button class="knapp knapp-omriss" id="siste-deltakere-knapp" onclick="toggleSisteDeltakere()" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:17px;letter-spacing:0;padding:13px 16px">
+        <span>🕐 Siste deltakere</span>
+        <svg id="siste-deltakere-pil" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <!-- Siste deltakere-liste (skjult som standard) -->
+      <div id="siste-deltakere-panel" style="display:none;margin-bottom:10px">
+        <div id="siste-deltakere-laster" class="laster" style="display:none">
+          <div class="laster-snurr"></div>Laster siste deltakere…
+        </div>
+        <div class="spillerliste" id="siste-deltakere-liste"></div>
+      </div>
+      <div id="spiller-laster" class="laster" style="display:none">
+        <div class="laster-snurr"></div>Laster spillere…
+      </div>
+      <div class="spillerliste" id="spiller-liste" style="display:none"></div>
+      <div style="text-align:center;padding:10px 0 0;font-size:16px;color:var(--muted2)">
+        <span id="valgt-antall" style="color:var(--yellow);font-weight:700">0</span> valgt
+        — <span id="aktive-antall" style="color:var(--green2);font-weight:600">0</span> aktive,
+        <span id="vl-antall" style="color:var(--orange);font-weight:600">0</span> på venteliste
+      </div>
+    </div></div>
+    <button class="knapp knapp-primaer" id="start-knapp" onclick="startTrening()" disabled>START ØKT</button>
+  </div>
+</div>
+
+<!-- SKJERM 0 — HJEMSKJERM -->
+<div id="skjerm-hjem" class="screen">
+  <div class="scroll-omrade" style="padding-top:40px">
+
+    <!-- Logo + tittel -->
+   <div style="text-align:center;margin-bottom:42px">
+        <img src="logo.svg" class="hjem-logo"
+     onerror="document.getElementById('hjem-logo-svg').style.display='block'; this.style.display='none';">
+        <svg id="hjem-logo-svg" style="display:none" viewBox="0 0 120 120" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+          <!-- Skygge -->
+          <ellipse cx="60" cy="112" rx="32" ry="6" fill="rgba(0,0,0,0.25)"/>
+          <!-- Hovedkule -->
+          <circle cx="60" cy="58" r="50" fill="#f0c020"/>
+          <!-- Lysrefleks øverst -->
+          <circle cx="60" cy="58" r="50" fill="url(#ballGrad)"/>
+          <!-- Dybde-skygge nederst -->
+          <circle cx="60" cy="58" r="50" fill="url(#ballSkygge)" opacity="0.35"/>
+          <!-- Hull — innebandyball har typisk 26 hull i mønster -->
+          <!-- Rad 1 -->
+          <circle cx="60" cy="22" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <!-- Rad 2 -->
+          <circle cx="38" cy="34" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="60" cy="34" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="82" cy="34" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <!-- Rad 3 -->
+          <circle cx="26" cy="50" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="49" cy="50" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="71" cy="50" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="94" cy="50" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <!-- Rad 4 (midtre) -->
+          <circle cx="22" cy="67" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="44" cy="67" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="66" cy="67" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="88" cy="67" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <!-- Rad 5 -->
+          <circle cx="30" cy="83" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="52" cy="83" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="74" cy="83" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="96" cy="83" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <!-- Rad 6 -->
+          <circle cx="42" cy="98" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="64" cy="98" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <circle cx="86" cy="98" r="5.5" fill="#c8960a" opacity="0.85"/>
+          <!-- Lysrefleks (hvit, oval) -->
+          <ellipse cx="46" cy="38" rx="12" ry="7" fill="white" opacity="0.22" transform="rotate(-30 46 38)"/>
+          <!-- Gradienter -->
+          <defs>
+            <radialGradient id="ballGrad" cx="38%" cy="30%" r="65%">
+              <stop offset="0%"   stop-color="#fff9d6" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#e8a800" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="ballSkygge" cx="60%" cy="75%" r="55%">
+              <stop offset="0%"   stop-color="#7a5500" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#7a5500" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      <div class="hjem-undertittel">Americano</div>
+    </div>
+
+    <!-- Klubbvelger -->
+    <div class="hjem-seksjon" style="margin-bottom:20px">
+      <div class="hjem-seksjon-tittel">Velg klubb</div>
+      <div style="position:relative">
+        <select id="klubb-velger" onchange="byttKlubb(this.value)"
+          style="width:100%;padding:14px 44px 14px 16px;background:var(--navy2);border:1px solid var(--border2);border-radius:14px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:18px;appearance:none;-webkit-appearance:none;cursor:pointer;outline:none">
+          <option value="">— Velg klubb —</option>
+          <option value="pickleball-jaeren">Pickleball Jæren</option>
+          <option value="fokus-pickleball">Fokus Pickleball</option>
+          <option value="demo">🎮 Demo</option>
+        </select>
+        <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div id="demo-info" style="display:none;margin-top:8px;padding:10px 14px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);border-radius:10px;font-size:14px;color:var(--muted2)">
+        🎮 Demo-modus — utforsk appen med fiktive spillere. Ingen PIN kreves.
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="hjem-status-boks" id="hjem-status-boks">
+      <div class="hjem-status-dot" id="hjem-status-dot"></div>
+      <div>
+        <div class="hjem-status-tekst" id="hjem-status-tekst">Ingen aktiv økt</div>
+        <div class="hjem-status-sub" id="hjem-status-sub"></div>
+      </div>
+    </div>
+
+    <!-- Navigasjonsknapper (2x2 grid) -->
+    <div class="hjem-seksjon">
+      <div class="hjem-seksjon-tittel">Naviger til</div>
+      <div class="hjem-knapp-grid">
+        <button class="hjem-nav-knapp" onclick="naviger('baner')">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <span class="hjem-nav-knapp-tekst">Baner</span>
+        </button>
+        <button class="hjem-nav-knapp" onclick="naviger('slutt')">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span class="hjem-nav-knapp-tekst">Resultater</span>
+        </button>
+        <button class="hjem-nav-knapp" onclick="naviger('spillere')">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          <span class="hjem-nav-knapp-tekst">Spillere</span>
+        </button>
+        <button class="hjem-nav-knapp" onclick="naviger('arkiv')">
+          <svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          <span class="hjem-nav-knapp-tekst">Arkiv</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="hjem-divider"></div>
+
+    <!-- Hurtigvalg -->
+    <div class="hjem-seksjon">
+      <div class="hjem-seksjon-tittel">Hurtigvalg</div>
+      <div class="hjem-knapper">
+        <button class="knapp knapp-primaer" onclick="krevAdmin('Start ny økt','Kun administrator kan starte ny økt.',()=>nyTrening())" id="hjem-start-knapp">
+          START NY ØKT
+        </button>
+        <button class="knapp knapp-gronn" onclick="naviger('baner')"
+                id="hjem-fortsett-knapp" style="display:none">
+          ▶ FORTSETT ØKT
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SKJERM 2 — BANEOVERSIKT -->
+<div id="skjerm-baner" class="screen">
+  <div class="app-header">
+    <div class="app-logo">PB</div>
+    <div>
+      <div class="app-name">Runde <span id="runde-hdr">1</span>/<span id="maks-runder-hdr">4</span></div>
+      <div class="app-sub" style="display:flex;align-items:center;gap:6px">
+        <span id="baner-hdr-sub">Baneoversikt</span>
+        <span id="mix-modus-merke" style="display:none;align-items:center;gap:3px;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;background:rgba(34,197,94,.15);color:var(--green2);border:1px solid rgba(34,197,94,.3);border-radius:4px;padding:1px 6px">🎲 Mix</span>
+      </div>
+    </div>
+    <div class="header-right" style="gap:8px">
+      <button class="knapp knapp-omriss knapp-liten" onclick="delLenke()" id="del-lenke-knapp" title="Del lenke til denne økten">🔗 Del</button>
+      <button class="knapp knapp-omriss knapp-liten" id="avbryt-runde1-knapp" onclick="visAvbrytOktModal()" style="display:none">← Avbryt</button>
+      <button class="knapp knapp-omriss knapp-liten" onclick="visAvsluttModal()">Avslutt<span class="admin-merke">Admin</span></button>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <div class="runde-indikator">
+      <div class="runde-prikk-live"></div>
+      <span id="runde-indikator-tekst">Runde 1 pågår</span>
+    </div>
+    <div id="fremgang-beholder" class="fremgang-beholder"></div>
+    <div id="venteliste-visning"></div>
+    <div id="bane-laster" class="laster" style="display:none"><div class="laster-snurr"></div>Laster kampstatus…</div>
+    <div id="bane-liste"></div>
+    <button class="knapp knapp-gronn" id="neste-runde-knapp" onclick="visNesteRundeModal()" disabled>NESTE KAMP →</button>
+  </div>
+</div>
+
+<!-- SKJERM 3 — POENGREGISTRERING -->
+<div id="skjerm-poeng" class="screen">
+  <div class="app-header" style="gap:12px">
+    <button class="tilbake-btn" onclick="naviger('baner')">←</button>
+    <div>
+      <div class="app-name">Bane <span id="poeng-bane-nummer">1</span></div>
+      <div class="app-sub">Registrer poeng</div>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <div class="poeng-hero">
+      <div class="poeng-hero-nummer" id="poeng-bane-stor">1</div>
+      <div class="poeng-hero-etikett">Bane</div>
+    </div>
+    <div class="poeng-tips">Spill til <span id="maks-hint">15</span> poeng — lagres automatisk</div>
+    <div id="poeng-kamper"></div>
+    <div class="feil-boks" id="valider-feil"></div>
+    <div class="poeng-nav">
+      <button class="knapp knapp-omriss" id="poeng-forrige-knapp" onclick="navigerBane(-1)">← Forrige</button>
+      <button class="knapp knapp-primaer" id="poeng-neste-knapp" onclick="navigerBane(1)">Neste →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SKJERM 4 — RUNDERESULTAT -->
+<div id="skjerm-resultat" class="screen">
+  <div class="app-header" style="gap:12px">
+    <button class="tilbake-btn" onclick="naviger('baner')">←</button>
+    <div>
+      <div class="app-name">Runde <span id="res-runde-nummer">1</span> resultat</div>
+      <div class="app-sub" id="resultat-hdr-sub">Rangering og forflytning</div>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <div id="resultat-innhold"></div>
+    <button class="knapp knapp-gronn" id="neste-runde-resultat-knapp" onclick="bekreftNesteRunde()">NESTE RUNDE →</button>
+  </div>
+</div>
+
+<!-- SKJERM 5 — SLUTTRESULTAT -->
+<div id="skjerm-slutt" class="screen">
+  <div class="app-header">
+    <div class="app-logo">PB</div>
+    <div>
+      <div class="app-name" id="slutt-hdr-navn">Sluttresultat</div>
+      <div class="app-sub" id="slutt-hdr-sub">Økten er ferdig</div>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <!-- Vises kun i Mix & Match — skjules av JS i konkurranse-modus -->
+    <div id="mix-slutt-banner" style="display:none">
+      <div class="mix-slutt-intro">
+        <div class="mix-slutt-intro-ikon">🎲</div>
+        <div>
+          <div class="mix-slutt-intro-tittel">Mix &amp; Match fullført!</div>
+          <div class="mix-slutt-intro-sub">Sosial spilling — uten press</div>
+        </div>
+      </div>
+      <div class="mix-slutt-pills">
+        <div class="mix-slutt-pill">🤝 Ny partner hver runde</div>
+        <div class="mix-slutt-pill">😄 Spill og bli kjent</div>
+        <div class="mix-slutt-pill">⭐ Ingen ratingendringer</div>
+      </div>
+    </div>
+    <div class="seksjon-etikett" id="slutt-ledertavle-label">🏆 Ledertavle</div>
+    <div class="kort"><div class="kort-innhold" style="padding:0">
+      <div id="ledertavle" style="padding:0 16px"></div>
+    </div></div>
+    <div class="seksjon-etikett" style="margin-top:4px">Ratingendringer</div>
+    <div class="kort"><div class="kort-innhold" style="padding:0">
+      <div id="rating-endringer" style="padding:0 16px"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- SKJERM 6 — SPILLERPROFIL -->
+<div id="skjerm-profil" class="screen">
+  <div class="app-header" style="gap:12px">
+    <button class="tilbake-btn" onclick="naviger('slutt')">←</button>
+    <div>
+      <div class="app-name" id="profil-navn">Spiller</div>
+      <div class="app-sub">Profil</div>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <div class="rating-hero">
+      <div class="rating-stor" id="profil-rating">1000</div>
+      <div class="rating-etikett">Nåværende rating</div>
+    </div>
+    <div class="stat-rutenett" id="profil-statistikk"></div>
+    <div class="seksjon-etikett">Ratinghistorikk</div>
+    <div class="diagram-beholder"><canvas id="rating-diagram" height="160"></canvas></div>
+    <div class="seksjon-etikett">Øktsoversikt</div>
+    <div class="kort"><div class="kort-innhold" style="padding:0">
+      <div id="trening-historikk" style="padding:0 16px"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- SKJERM 7 - GLOBAL SPILLERLISTE -->
+<div id="skjerm-spillere" class="screen">
+  <div class="app-header">
+    <div class="app-logo">PB</div>
+    <div>
+      <div class="app-name">Spillere</div>
+      <div class="app-sub">Rating &amp; historikk</div>
+    </div>
+    <div class="header-right">
+      <button class="knapp knapp-omriss knapp-liten" onclick="oppdaterGlobalLedertavle()">&#8635; Oppdater</button>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="knapp knapp-fare knapp-liten" style="flex:1" onclick="visNullstillModal()">Nullstill rating</button>
+      <button class="knapp knapp-fare knapp-liten" style="flex:1" onclick="visSlettAlleSpillereModal()">Slett alle spillere</button>
+    </div>
+
+    <!-- Sesongkåring -->
+    <div class="seksjon-etikett">Sesongkåring</div>
+    <div id="sesong-laster" class="laster" style="display:none">
+      <div class="laster-snurr"></div>Beregner sesongkåring…
+    </div>
+    <div id="sesong-kaaring" style="display:none">
+
+      <!-- Formspilleren -->
+      <div class="kort" style="margin-bottom:10px">
+        <div class="kort-hode">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:22px">🔥</span>
+            <div>
+              <div style="font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:1px;color:var(--yellow)">Formspilleren</div>
+              <div style="font-size:13px;color:var(--muted2);margin-top:1px">Høyest overperformance — vinner mer enn ratingen tilsier</div>
+            </div>
+          </div>
+        </div>
+        <div class="kort-innhold" id="sesong-formspiller"></div>
+      </div>
+
+      <!-- Beste partner -->
+      <div class="kort" style="margin-bottom:14px">
+        <div class="kort-hode">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:22px">🤝</span>
+            <div>
+              <div style="font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:1px;color:var(--accent2)">Beste partner</div>
+              <div style="font-size:13px;color:var(--muted2);margin-top:1px">Løfter flest lagkamerater over forventet nivå</div>
+            </div>
+          </div>
+        </div>
+        <div class="kort-innhold" id="sesong-beste-partner"></div>
+      </div>
+
+    </div>
+
+    <div class="seksjon-etikett">Ratingliste</div>
+    <div id="global-laster" class="laster" style="display:none">
+      <div class="laster-snurr"></div>Laster spillere…
+    </div>
+    <div class="kort">
+      <div class="kort-innhold" style="padding:0">
+        <div id="global-ledertavle" style="padding:0 16px">
+          <div style="padding:20px;text-align:center;color:var(--muted2);font-size:16px">Trykk Oppdater for å laste ledertavlen</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sammenlign spillere -->
+    <div class="seksjon-etikett" style="margin-top:4px">Sammenlign spillere</div>
+    <div class="kort" style="margin-bottom:14px">
+      <div class="kort-innhold">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <div style="flex:1">
+            <div style="font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:6px">Spiller 1</div>
+            <select id="sammenlign-s1" class="sammenlign-velger" onchange="nullstillSammenligning()">
+              <option value="">— Velg spiller —</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end;padding-bottom:2px;font-family:'Bebas Neue',cursive;font-size:20px;color:var(--muted)">VS</div>
+          <div style="flex:1">
+            <div style="font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:6px">Spiller 2</div>
+            <select id="sammenlign-s2" class="sammenlign-velger" onchange="nullstillSammenligning()">
+              <option value="">— Velg spiller —</option>
+            </select>
+          </div>
+        </div>
+        <button class="knapp knapp-primaer" onclick="kjorSammenligning()" id="sammenlign-knapp" disabled>
+          SAMMENLIGN
+        </button>
+      </div>
+      <div id="sammenlign-laster" class="laster" style="display:none">
+        <div class="laster-snurr"></div>Henter kampdata…
+      </div>
+      <div id="sammenlign-resultat" style="display:none"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SKJERM 8 - GLOBAL SPILLERPROFIL -->
+<div id="skjerm-global-profil" class="screen">
+  <div class="app-header" style="gap:12px">
+    <button class="tilbake-btn" onclick="naviger('spillere')">&#8592;</button>
+    <div>
+      <div class="app-name" id="global-profil-navn">Spiller</div>
+      <div class="app-sub">Profil</div>
+    </div>
+    <div class="header-right">
+      <button class="knapp knapp-fare knapp-liten" onclick="visSlettSpillerModal()">Slett</button>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <div class="rating-hero">
+      <div class="rating-stor" id="global-profil-rating">1000</div>
+      <div class="rating-etikett">Nåværende rating</div>
+      <div style="margin-top:8px">
+        <span id="global-profil-nivaa-label" class="nivaa-label" style="display:none"></span>
+      </div>
+    </div>
+    <div class="stat-rutenett" id="global-profil-statistikk"></div>
+    <div class="seksjon-etikett">Kampstatistikk</div>
+    <div id="global-kampstat-innhold">
+      <div class="kampstat-laster">Beregner statistikk…</div>
+    </div>
+    <div class="seksjon-etikett">Ratinghistorikk</div>
+    <div class="diagram-beholder"><canvas id="global-rating-diagram" height="160"></canvas></div>
+    <div class="seksjon-etikett">Øktsoversikt</div>
+    <div class="kort"><div class="kort-innhold" style="padding:0">
+      <div id="global-trening-historikk" style="padding:0 16px"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- SKJERM 9 - TRENINGSARKIV -->
+<div id="skjerm-arkiv" class="screen">
+  <div class="app-header">
+    <div class="app-logo">PB</div>
+    <div>
+      <div class="app-name">Arkiv</div>
+      <div class="app-sub">Økthistorikk</div>
+    </div>
+    <div class="header-right">
+      <button class="knapp knapp-omriss knapp-liten" onclick="lastArkiv()">&#8635; Oppdater</button>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <div style="margin-bottom:14px">
+      <button class="knapp knapp-fare knapp-liten" style="width:100%" onclick="visSlettAlleOkterModal()">Slett alle økter</button>
+    </div>
+    <div id="arkiv-laster" class="laster" style="display:none">
+      <div class="laster-snurr"></div>Laster økter…
+    </div>
+    <div id="arkiv-liste">
+      <div style="padding:20px;text-align:center;color:var(--muted2);font-size:16px">
+        Trykk Oppdater for å laste økthistorikk
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SKJERM 10 - TRENINGSDETALJ -->
+<div id="skjerm-treningsdetalj" class="screen">
+  <div class="app-header" style="gap:12px">
+    <button class="tilbake-btn" onclick="naviger('arkiv')">&#8592;</button>
+    <div>
+      <div class="app-name" id="detalj-tittel">Økt</div>
+      <div class="app-sub" id="detalj-dato"></div>
+    </div>
+    <div class="header-right">
+      <button class="knapp knapp-fare knapp-liten" onclick="visSlettOktModal()">Slett</button>
+    </div>
+  </div>
+  <div class="scroll-omrade">
+    <div id="detalj-meta" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"></div>
+    <div class="seksjon-etikett">Sluttrangering</div>
+    <div class="kort"><div class="kort-innhold" style="padding:0">
+      <div id="detalj-rangering" style="padding:0 16px"></div>
+    </div></div>
+    <div class="seksjon-etikett" id="detalj-rating-seksjon">Ratingendringer</div>
+    <div class="kort"><div class="kort-innhold" style="padding:0">
+      <div id="detalj-rating" style="padding:0 16px"></div>
+    </div></div>
+    <div class="seksjon-etikett">Kampresultater</div>
+    <div id="detalj-kamper">
+      <div class="laster"><div class="laster-snurr"></div>Laster kamper…</div>
+    </div>
+  </div>
+</div>
+
+<!-- BUNN-NAV -->
+<nav class="bunn-nav" id="bunn-nav" style="display:none">
+  <button class="nav-knapp" onclick="naviger('hjem')" id="nav-hjem">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Hjem
+  </button>
+  <button class="nav-knapp" onclick="naviger('baner')" id="nav-baner">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M12 3v18"/></svg>
+    Baner
+  </button>
+  <button class="nav-knapp" onclick="naviger('slutt')" id="nav-slutt">
+    <svg viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+    Resultater
+  </button>
+  <button class="nav-knapp" onclick="naviger('spillere')" id="nav-spillere">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    Spillere
+  </button>
+  <button class="nav-knapp" onclick="naviger('arkiv')" id="nav-arkiv">
+    <svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+    Arkiv
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<!-- PWA-oppdateringsvarsel -->
+<div id="oppdatering-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#1a3d7c;border-top:2px solid #2563eb;padding:14px 20px;z-index:1000;display:none;align-items:center;justify-content:space-between;gap:12px;font-family:'DM Sans',sans-serif">
+  <span style="color:#f1f5f9;font-size:16px;font-weight:500">Ny versjon tilgjengelig</span>
+  <button onclick="lastNyVersjon()" style="background:#2563eb;color:#fff;border:none;border-radius:10px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;flex-shrink:0">Last på nytt</button>
+</div>
+
+<!-- Modal: Slett alle økter -->
+<div class="modal-bakgrunn" id="modal-slett-alle-okter" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-tittel" style="color:var(--red2)">Slette alle økter?</div>
+    <div class="modal-tekst">
+      Dette sletter <strong style="color:var(--white)">alle lagrede økter</strong> og tilhørende data permanent:
+      kamper, resultater, deltakerlister og ratinghistorikk.<br><br>
+      <span style="color:var(--orange);font-weight:600">Merk: Spillernes nåværende rating påvirkes ikke.</span><br><br>
+      <span style="color:var(--red2);font-weight:600">Kan ikke angres.</span>
+    </div>
+    <div id="slett-alle-teller" style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:16px;color:var(--muted2);text-align:center"></div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="document.getElementById('modal-slett-alle-okter').style.display='none'">Avbryt</button>
+      <button class="knapp knapp-fare" style="flex:1;font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px" onclick="utforSlettAlleOkter()">SLETT ALLE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Slett alle spillere -->
+<div class="modal-bakgrunn" id="modal-slett-alle-spillere" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-tittel" style="color:var(--red2)">Slette alle spillere?</div>
+    <div class="modal-tekst">
+      Dette sletter <strong style="color:var(--white)">alle spillere</strong> og all tilknyttet data permanent:
+      ratinghistorikk, resultater og deltakerlister.<br><br>
+      <span style="color:var(--red2);font-weight:600">Kan ikke angres.</span>
+    </div>
+    <div id="slett-alle-spillere-teller" style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:16px;color:var(--muted2);text-align:center"></div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="document.getElementById('modal-slett-alle-spillere').style.display='none'">Avbryt</button>
+      <button class="knapp knapp-fare" style="flex:1;font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px" onclick="utforSlettAlleSpillere()">SLETT ALLE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Avbryt økt (runde 1) -->
+<div class="modal-bakgrunn" id="modal-avbryt-okt" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-tittel" style="color:var(--orange)">Avbryte økten?</div>
+    <div class="modal-tekst">
+      Ingen poeng er registrert ennå. Økten slettes og du sendes tilbake til oppsett-skjermen med spillerlisten intakt.
+    </div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="document.getElementById('modal-avbryt-okt').style.display='none'">Avbryt</button>
+      <button class="knapp knapp-fare" style="flex:1;font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px" onclick="utforAvbrytOkt()">AVBRYT ØKT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: PIN-bekreftelse (admin) -->
+<div class="modal-bakgrunn" id="modal-pin" style="display:none" onclick="if(event.target===this)lukkPinModal()">
+  <div class="modal">
+    <div class="modal-tittel" id="pin-tittel">Admin-bekreftelse</div>
+    <div class="modal-tekst" id="pin-tekst">Skriv inn PIN-koden for å fortsette.</div>
+    <div class="pin-felt">
+      <input class="pin-siffer" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin0" oninput="pinInput(0)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input class="pin-siffer" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin1" oninput="pinInput(1)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input class="pin-siffer" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin2" oninput="pinInput(2)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input class="pin-siffer" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin3" oninput="pinInput(3)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+    </div>
+    <div class="pin-feil" id="pin-feil"></div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="lukkPinModal()">Avbryt</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Avslutt trening -->
+<div class="modal-bakgrunn" id="modal-avslutt" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-tittel">Avslutte økten?</div>
+    <div class="modal-tekst" id="modal-avslutt-tekst">Dette beregner sluttrangeringen og oppdaterer alle spilleres rating. Kan ikke angres.</div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="document.getElementById('modal-avslutt').style.display='none'">Avbryt</button>
+      <button class="knapp knapp-fare" style="flex:1;font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px" onclick="avsluttTreningUI()">AVSLUTT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Neste runde -->
+<div class="modal-bakgrunn" id="modal-neste" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-tittel" id="modal-neste-tittel">Neste runde?</div>
+    <div class="modal-tekst" id="modal-neste-tekst">Vil du se rangeringer og forflytninger?</div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="document.getElementById('modal-neste').style.display='none'">Avbryt</button>
+      <button class="knapp knapp-primaer" style="flex:1;font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px" onclick="visRundeResultat()">SE RESULTATER</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Slett spiller -->
+<div class="modal-bakgrunn" id="modal-slett-spiller" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-tittel" style="color:var(--red2)">Slette spiller?</div>
+    <div class="modal-tekst">
+      <strong id="slett-spiller-navn" style="color:var(--white)">Spiller</strong> vil bli slettet permanent
+      sammen med all ratinghistorikk og resultater.<br><br>
+      <span style="color:var(--red2);font-weight:600">Kan ikke angres.</span>
+    </div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="document.getElementById('modal-slett-spiller').style.display='none'">Avbryt</button>
+      <button class="knapp knapp-fare" style="flex:1;font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px" onclick="utforSlettSpiller()">SLETT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Slett økt -->
+<div class="modal-bakgrunn" id="modal-slett-okt" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-tittel" style="color:var(--red2)">Slette økt?</div>
+    <div class="modal-tekst">
+      Denne økten vil bli slettet permanent, inkludert alle kamper og resultater.<br><br>
+      <strong style="color:var(--orange)">Merk:</strong>
+      <span style="color:var(--muted2)"> Ratingendringer som allerede er beregnet vil <strong style="color:var(--white)">ikke</strong> bli tilbakeført. Bruk «Nullstill» for å tilbakestille all rating.</span>
+    </div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="document.getElementById('modal-slett-okt').style.display='none'">Avbryt</button>
+      <button class="knapp knapp-fare" style="flex:1;font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px" onclick="utforSlettOkt()">SLETT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nullstill rating og historikk -->
+<div class="modal-bakgrunn" id="modal-nullstill" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-tittel" style="color:var(--red2)">Nullstille alt?</div>
+    <div class="modal-tekst">
+      Dette vil sette alle spilleres rating tilbake til <strong style="color:var(--white)">1000</strong>
+      og slette all ratinghistorikk permanent.<br><br>
+      <span style="color:var(--red2);font-weight:600">Kan ikke angres.</span>
+    </div>
+    <div style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:16px;color:var(--muted2)">
+      Pågående øktdata (baner, kamper, runder) berøres ikke.
+    </div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="document.getElementById('modal-nullstill').style.display='none'">Avbryt</button>
+      <button class="knapp knapp-fare" style="flex:1;font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px" onclick="utforNullstill()">NULLSTILL</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Bekreft poeng -->
+<div class="modal-bakgrunn" id="modal-bekreft" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-tittel">Bekreft poeng</div>
+    <div class="modal-tekst" id="modal-bekreft-innhold"></div>
+    <div class="modal-knapper">
+      <button class="knapp knapp-omriss" style="flex:1" onclick="document.getElementById('modal-bekreft').style.display='none'">Endre</button>
+      <button class="knapp knapp-gronn" style="flex:1;font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px" onclick="lagreBekreftede()">LAGRE</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // Lytt etter ny service worker som venter på å aktiveres
+      reg.addEventListener('updatefound', () => {
+        const nyWorker = reg.installing;
+        nyWorker.addEventListener('statechange', () => {
+          if (nyWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Ny versjon er klar — vis banner
+            document.getElementById('oppdatering-banner').style.display = 'flex';
+          }
+        });
+      });
+    });
+  }
+
+  function lastNyVersjon() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg?.waiting) {
+          // Be den ventende service workeren ta over
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
+    }
+    window.location.reload();
+  }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
